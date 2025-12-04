@@ -107,6 +107,30 @@ class EconomicalHotelAnalysis extends BookingAnalysis:
     println(f"Profit Margin Score    : ${best._5}%.4f")
     println(f"* FINAL SCORE *        : ${best._1}%.4f")
 
+// Question 3 : Most Profitable Hotel
+
+class MostProfitableHotelAnalysis extends BookingAnalysis:
+  import Utils.*
+
+  override def analyze(data: List[Map[String,String]]): Unit =
+    val stats = data.map {row =>
+      val hotel = row("Hotel Name")
+      val rooms = safeInt(row("Rooms"))
+      val profit = safeDouble(row("Profit Margin"))
+      (hotel, rooms * profit)
+    }
+
+    val grouped = stats.groupBy(_._1)
+    val totals = grouped.map { case (hotel, rows) =>
+       val totalProfit = rows.map(_._2).sum
+       (hotel, totalProfit)
+    }.toList
+
+    val best = totals.sortBy(-_._2).head
+
+    println("\n[3: Most Profitable Hotel]")
+    println(s"Hotel Name    : ${best._1}")
+    println(f"Total Score   : ${best._2}%.2f")
 
 //Main Program
 object Main:
@@ -115,7 +139,8 @@ object Main:
 
     val analyses: List[BookingAnalysis] = List(
       new PopularCountryAnalysis,
-      new EconomicalHotelAnalysis
+      new EconomicalHotelAnalysis,
+      new MostProfitableHotelAnalysis
     )
 
     analyses.foreach(_.analyze(data))
