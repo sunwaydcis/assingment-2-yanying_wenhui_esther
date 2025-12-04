@@ -103,20 +103,20 @@ class EconomicalHotelAnalysis extends BookingAnalysis:
           1 - ((avgProfit - minProfit) / profitRange)
 
         val finalScore = (priceScore + discountScore + profitScore) / 3
-        (finalScore, country, city, hotel, priceScore, discountScore, profitScore)
+        (country, city, hotel, priceScore, discountScore, profitScore, finalScore)
     }
-    val best = scored.sortBy(-_._1).head
+    val best = scored.sortBy(-_._7).head
 
     println("\n2: Most Economical Hotel")
     println("+--------------------------+------------------------------+")
-    println(f"| Destination Country      | ${best._2}%-28s |")
-    println(f"| Destination City         | ${best._3}%-28s |")
-    println(f"| Hotel Name               | ${best._4}%-28s |")
-    println(f"| Booking Price Score      | ${best._5}%-28.4f |")
-    println(f"| Discount Score           | ${best._6}%-28.4f |")
-    println(f"| Profit Margin Score      | ${best._7}%-28.4f |")
+    println(f"| Destination Country      | ${best._1}%-28s |")
+    println(f"| Destination City         | ${best._2}%-28s |")
+    println(f"| Hotel Name               | ${best._3}%-28s |")
+    println(f"| Booking Price Score      | ${best._4}%-28.4f |")
+    println(f"| Discount Score           | ${best._5}%-28.4f |")
+    println(f"| Profit Margin Score      | ${best._6}%-28.4f |")
     println("+--------------------------+------------------------------+")
-    println(f"| FINAL SCORE              | ${best._1}%-28.4f |")
+    println(f"| FINAL SCORE              | ${best._7}%-28.4f |")
     println("+--------------------------+------------------------------+")
 
 
