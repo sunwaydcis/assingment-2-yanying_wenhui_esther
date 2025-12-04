@@ -49,9 +49,15 @@ class EconomicalHotelAnalysis extends BookingAnalysis:
     java.time.temporal.ChronoUnit.DAYS.between(day1, day2).toInt.max(1)
 
   override def analyze(data: List[Map[String,String]]): Unit =
-    val grouped = data.groupBy(_("Hotel Name"))
+    val grouped = data.groupBy { row =>
+      (
+        row("Destination Country"),
+        row("Destination City"),
+        row("Hotel Name")
+      )
+    }
     val hotelStats = grouped.map {
-      case (hotel, rows) =>
+      case ((country, city, hotel) , rows) =>
         // Average cost per night for each hotel
         val priceRows = rows.map { r =>
           val price = safeDouble(r("Booking Price[SGD]"))
@@ -66,17 +72,18 @@ class EconomicalHotelAnalysis extends BookingAnalysis:
 
         // Average profit margin
         val avgProfit = rows.map(r => safeDouble(r("Profit Margin"))).sum / rows.size
-        (hotel, avgPrice, avgDiscount, avgProfit)
+        (country, city, hotel, avgPrice, avgDiscount, avgProfit)
     }.toList
 
-    val minPrice = hotelStats.map(_._2).min
-    val maxPrice = hotelStats.map(_._2).max
+    // Find min max ranges for normalization
+    val minPrice = hotelStats.map(_._4).min
+    val maxPrice = hotelStats.map(_._4).max
 
-    val minDiscount = hotelStats.map(_._3).min
-    val maxDiscount = hotelStats.map(_._3).max
+    val minDiscount = hotelStats.map(_._5).min
+    val maxDiscount = hotelStats.map(_._5).max
 
-    val minProfit = hotelStats.map(_._4).min
-    val maxProfit = hotelStats.map(_._4).max
+    val minProfit = hotelStats.map(_._6).min
+    val maxProfit = hotelStats.map(_._6).max
 
     val priceRange = (maxPrice - minPrice).max(0.00001)
     val discountRange = (maxDiscount - minDiscount).max(0.00001)
@@ -84,7 +91,7 @@ class EconomicalHotelAnalysis extends BookingAnalysis:
 
     // Normalize
     val scored = hotelStats.map {
-      case (hotel, avgPrice, avgDiscount, avgProfit) =>
+      case (country, city, hotel, avgPrice, avgDiscount, avgProfit) =>
         // LOWER = BETTER
         val priceScore =
           1 - ((avgPrice - minPrice) / priceRange)
@@ -95,20 +102,25 @@ class EconomicalHotelAnalysis extends BookingAnalysis:
         val profitScore =
           1 - ((avgProfit - minProfit) / profitRange)
 
-        val finalScore = priceScore + discountScore + profitScore
-        (finalScore, hotel, priceScore, discountScore, profitScore)
+        val finalScore = (priceScore + discountScore + profitScore) / 3
+        (finalScore, country, city, hotel, priceScore, discountScore, profitScore)
     }
     val best = scored.sortBy(-_._1).head
 
-    println("\n[2: Most Economical Hotel]")
-    println(s"Hotel Name             : ${best._2}")
-    println(f"Booking Price Score    : ${best._3}%.4f")
-    println(f"Discount Score         : ${best._4}%.4f")
-    println(f"Profit Margin Score    : ${best._5}%.4f")
-    println(f"* FINAL SCORE *        : ${best._1}%.4f")
+    println("\n2: Most Economical Hotel")
+    println("+--------------------------+------------------------------+")
+    println(f"| Destination Country      | ${best._2}%-28s |")
+    println(f"| Destination City         | ${best._3}%-28s |")
+    println(f"| Hotel Name               | ${best._4}%-28s |")
+    println(f"| Booking Price Score      | ${best._5}%-28.4f |")
+    println(f"| Discount Score           | ${best._6}%-28.4f |")
+    println(f"| Profit Margin Score      | ${best._7}%-28.4f |")
+    println("+--------------------------+------------------------------+")
+    println(f"| FINAL SCORE              | ${best._1}%-28.4f |")
+    println("+--------------------------+------------------------------+")
+
 
 // Question 3 : Most Profitable Hotel
-
 class MostProfitableHotelAnalysis extends BookingAnalysis:
   import Utils.*
 
@@ -128,7 +140,7 @@ class MostProfitableHotelAnalysis extends BookingAnalysis:
 
     val best = totals.sortBy(-_._2).head
 
-    println("\n[3: Most Profitable Hotel]")
+    println("\n3: Most Profitable Hotel")
     println(s"Hotel Name    : ${best._1}")
     println(f"Total Score   : ${best._2}%.2f")
 
