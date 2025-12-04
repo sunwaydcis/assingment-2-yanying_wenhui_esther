@@ -128,24 +128,63 @@ class MostProfitableHotelAnalysis extends BookingAnalysis:
   import Utils.*
 
   override def analyze(data: List[Map[String,String]]): Unit =
-    val stats = data.map {row =>
-      val hotel = row("Hotel Name")
-      val rooms = safeInt(row("Rooms"))
-      val profit = safeDouble(row("Profit Margin"))
-      (hotel, rooms * profit)
+    val grouped = data.groupBy { row =>
+      (
+        row("Destination Country"),
+        row("Destination City"),
+        row("Hotel Name")
+      )
     }
 
-    val grouped = stats.groupBy(_._1)
-    val totals = grouped.map { case (hotel, rows) =>
-       val totalProfit = rows.map(_._2).sum
-       (hotel, totalProfit)
+    val stats = grouped.map {
+      case ((country, city, hotel), rows) =>
+        // Sum the number of visitors for the hotel
+        val totalVisitors = rows.map { r =>
+          safeInt(r("No. Of People")).max(1)
+        }.sum
+
+        // Calculate total profit main
+        val totalProfitMargin = rows.map { r =>
+          safeDouble(r("Profit Margin"))
+        }.sum
+
+        val averageProfitMargin = totalProfitMargin / rows.length
+
+        (country, city, hotel, totalVisitors, averageProfitMargin)
     }.toList
 
-    val best = totals.sortBy(-_._2).head
+    //Find the min and max for total visitors and profit margins
+    val minVisitors = stats.map(_._4).min
+    val maxVisitors = stats.map(_._4).max
+
+    val minProfitMargin = stats.map(_._5).min
+    val maxProfitMargin = stats.map(_._5).max
+
+    val finalStats = stats.map {
+      case (country, city, hotel, totalPeople, averageProfitMargin) =>
+        // Calculate visitor percentage
+        val visitorPercentage = (totalPeople - minVisitors).toDouble / (maxVisitors - minVisitors)
+
+        // Calculate profit margin percentage
+        val profitMarginPercentage = (averageProfitMargin - minProfitMargin) / (maxProfitMargin - minProfitMargin)
+
+        // Find the average of visitor and profit margin percentages
+        val finalScore = (visitorPercentage + profitMarginPercentage) / 2.0
+
+        (country, city, hotel, finalScore, totalPeople, averageProfitMargin)
+    }
+
+    val bestHotel = finalStats.maxBy(_._4)
 
     println("\n3: Most Profitable Hotel")
-    println(s"Hotel Name    : ${best._1}")
-    println(f"Total Score   : ${best._2}%.2f")
+    println("+--------------------------+------------------------------+")
+    println(f"| Destination Country      | ${bestHotel._1}%-28s |")
+    println(f"| Destination City         | ${bestHotel._2}%-28s |")
+    println(f"| Hotel Name               | ${bestHotel._3}%-28s |")
+    println("+--------------------------+------------------------------+")
+    println(f"| TOTAL PROFIT SCORE       | ${bestHotel._4}%-28.2f |")
+    println("+--------------------------+------------------------------+")
+
 
 //Main Program
 object Main:
