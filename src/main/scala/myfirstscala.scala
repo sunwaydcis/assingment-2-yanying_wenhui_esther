@@ -31,8 +31,11 @@ class PopularCountryAnalysis extends BookingAnalysis:
 
     top.foreach { case (country,rows) =>
       println("\n1: Highest Bookings Country")
-      println(s"Country        : $country")
-      println(s"Total Bookings : ${rows.size}")
+      println("+--------------------------+------------------------------+")
+      println(f"| Country                  | $country%-28s |")
+      println(f"| Total Bookings           | ${rows.size}%-28s |")
+      println("+--------------------------+------------------------------+")
+
     }
 
 //Question 2: Most Economical Hotel
