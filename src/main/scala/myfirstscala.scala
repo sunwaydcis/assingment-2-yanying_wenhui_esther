@@ -9,6 +9,7 @@ object HotelReport:
     val data = reader.allWithHeaders()
     reader.close()
     data
+end HotelReport
 
 // Utility functions
 object Utils:
@@ -23,7 +24,7 @@ object Utils:
 
   def minMax(values: List[Double]): (Double, Double) =
     (values.min, values.max)
-
+end Utils
 
 //Trait
 trait BookingAnalysis:
@@ -41,8 +42,8 @@ class PopularCountryAnalysis extends BookingAnalysis:
       println(f"| Country                  | $country%-28s |")
       println(f"| Total Bookings           | ${rows.size}%-28s |")
       println("+--------------------------+------------------------------+")
-
     }
+end PopularCountryAnalysis
 
 //Question 2: Most Economical Hotel
 class EconomicalHotelAnalysis extends BookingAnalysis:
@@ -89,22 +90,18 @@ class EconomicalHotelAnalysis extends BookingAnalysis:
     val (minDiscount, maxDiscount) = minMax(hotelStats.map(_._5))
     val (minProfit, maxProfit) = minMax(hotelStats.map(_._6))
 
-    val priceRange = (maxPrice - minPrice).max(0.00001)
-    val discountRange = (maxDiscount - minDiscount).max(0.00001)
-    val profitRange = (maxProfit - minProfit).max(0.00001)
-
     // Normalize
     val scored = hotelStats.map {
       case (country, city, hotel, avgPrice, avgDiscount, avgProfit) =>
         // LOWER = BETTER
         val priceScore =
-          1 - ((avgPrice - minPrice) / priceRange)
+          1 - ((avgPrice - minPrice) / (maxPrice - minPrice))
         // HIGHER = BETTER
         val discountScore =
-          (avgDiscount - minDiscount) / discountRange
+          (avgDiscount - minDiscount) / (maxDiscount - minDiscount)
         // LOWER = BETTER
         val profitScore =
-          1 - ((avgProfit - minProfit) / profitRange)
+          1 - ((avgProfit - minProfit) / (maxProfit - minProfit))
 
         val finalScore = (priceScore + discountScore + profitScore) / 3
         (country, city, hotel, priceScore, discountScore, profitScore, finalScore)
@@ -122,7 +119,7 @@ class EconomicalHotelAnalysis extends BookingAnalysis:
     println("+--------------------------+------------------------------+")
     println(f"| FINAL SCORE              | ${best._7}%-28.4f |")
     println("+--------------------------+------------------------------+")
-
+end EconomicalHotelAnalysis
 
 // Question 3 : Most Profitable Hotel
 class MostProfitableHotelAnalysis extends BookingAnalysis:
@@ -185,7 +182,7 @@ class MostProfitableHotelAnalysis extends BookingAnalysis:
     println("+--------------------------+------------------------------+")
     println(f"| TOTAL PROFIT SCORE       | ${bestHotel._4}%-28.4f |")
     println("+--------------------------+------------------------------+")
-
+end MostProfitableHotelAnalysis
 
 //Main Program
 object Main:
@@ -199,3 +196,5 @@ object Main:
     )
 
     analyses.foreach(_.analyze(data))
+
+end Main
