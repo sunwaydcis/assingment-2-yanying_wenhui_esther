@@ -1,6 +1,7 @@
 import com.github.tototoshi.csv._
 import java.io.File
 
+// Create object to load hotel data from CSV
 object HotelReport:
   def loadData(path: String): List[Map[String, String]] =
     val file = new File(path)
@@ -9,6 +10,7 @@ object HotelReport:
     reader.close()
     data
 
+// Helper functions for safely converting strings to numbers
 object Utils:
   def safeDouble(s: String): Double =
     val cleaned = s.replace("%", "").trim
