@@ -10,7 +10,7 @@ object HotelReport:
     reader.close()
     data
 
-// Helper functions for safely converting strings to numbers
+// Utility functions
 object Utils:
   def safeDouble(s: String): Double =
     val cleaned = s.replace("%", "").trim
@@ -20,6 +20,10 @@ object Utils:
   def safeInt(s: String): Int =
     try s.trim.toInt catch
       case _: Throwable => 0
+
+  def minMax(values: List[Double]): (Double, Double) =
+    (values.min, values.max)
+
 
 //Trait
 trait BookingAnalysis:
@@ -81,14 +85,9 @@ class EconomicalHotelAnalysis extends BookingAnalysis:
     }.toList
 
     // Find min max ranges for normalization
-    val minPrice = hotelStats.map(_._4).min
-    val maxPrice = hotelStats.map(_._4).max
-
-    val minDiscount = hotelStats.map(_._5).min
-    val maxDiscount = hotelStats.map(_._5).max
-
-    val minProfit = hotelStats.map(_._6).min
-    val maxProfit = hotelStats.map(_._6).max
+    val (minPrice, maxPrice) = minMax(hotelStats.map(_._4))
+    val (minDiscount, maxDiscount) = minMax(hotelStats.map(_._5))
+    val (minProfit, maxProfit) = minMax(hotelStats.map(_._6))
 
     val priceRange = (maxPrice - minPrice).max(0.00001)
     val discountRange = (maxDiscount - minDiscount).max(0.00001)
