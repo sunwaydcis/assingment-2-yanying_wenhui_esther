@@ -2,8 +2,8 @@ import com.github.tototoshi.csv._
 import java.io.File
 
 object HotelReport:
-  def loadData(): List[Map[String, String]] =
-    val file = new File("Hotel_Dataset.csv")
+  def loadData(path: String): List[Map[String, String]] =
+    val file = new File(path)
     val reader = CSVReader.open(file)
     val data = reader.allWithHeaders()
     reader.close()
@@ -182,14 +182,14 @@ class MostProfitableHotelAnalysis extends BookingAnalysis:
     println(f"| Destination City         | ${bestHotel._2}%-28s |")
     println(f"| Hotel Name               | ${bestHotel._3}%-28s |")
     println("+--------------------------+------------------------------+")
-    println(f"| TOTAL PROFIT SCORE       | ${bestHotel._4}%-28.2f |")
+    println(f"| TOTAL PROFIT SCORE       | ${bestHotel._4}%-28.4f |")
     println("+--------------------------+------------------------------+")
 
 
 //Main Program
 object Main:
   def main(args: Array[String]): Unit =
-    val data = HotelReport.loadData()
+    val data = HotelReport.loadData("Hotel_Dataset.csv")
 
     val analyses: List[BookingAnalysis] = List(
       new PopularCountryAnalysis,
