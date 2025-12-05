@@ -126,6 +126,7 @@ class MostProfitableHotelAnalysis extends BookingAnalysis:
   import Utils.*
 
   override def analyze(data: List[Map[String,String]]): Unit =
+    // Group the data by country, city, and hotel name
     val grouped = data.groupBy { row =>
       (
         row("Destination Country"),
@@ -136,22 +137,23 @@ class MostProfitableHotelAnalysis extends BookingAnalysis:
 
     val stats = grouped.map {
       case ((country, city, hotel), rows) =>
-        // Sum the number of visitors for the hotel
+        // Sum up all visitors for the hotel
         val totalVisitors = rows.map { r =>
           safeInt(r("No. Of People")).max(1)
         }.sum
 
-        // Calculate total profit main
+        // Calculate total profit margin for the hotel
         val totalProfitMargin = rows.map { r =>
           safeDouble(r("Profit Margin"))
         }.sum
 
+        // Average profit margin per booking
         val averageProfitMargin = totalProfitMargin / rows.length
 
         (country, city, hotel, totalVisitors, averageProfitMargin)
     }.toList
 
-    //Find the min and max for total visitors and profit margins
+    //Find the min and max values for visitors and profit margins
     val (minVisitors, maxVisitors) = minMax(stats.map(_._4))
     val (minProfitMargin, maxProfitMargin) = minMax(stats.map(_._5))
 
@@ -168,7 +170,7 @@ class MostProfitableHotelAnalysis extends BookingAnalysis:
 
         (country, city, hotel, finalScore, totalPeople, averageProfitMargin)
     }
-
+    // Pick the hotel with the highest score
     val bestHotel = finalStats.maxBy(_._4)
 
     println("\n3: Most Profitable Hotel")
