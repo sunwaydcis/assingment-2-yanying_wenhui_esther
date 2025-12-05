@@ -152,11 +152,8 @@ class MostProfitableHotelAnalysis extends BookingAnalysis:
     }.toList
 
     //Find the min and max for total visitors and profit margins
-    val minVisitors = stats.map(_._4).min
-    val maxVisitors = stats.map(_._4).max
-
-    val minProfitMargin = stats.map(_._5).min
-    val maxProfitMargin = stats.map(_._5).max
+    val (minVisitors, maxVisitors) = minMax(stats.map(_._4))
+    val (minProfitMargin, maxProfitMargin) = minMax(stats.map(_._5))
 
     val finalStats = stats.map {
       case (country, city, hotel, totalPeople, averageProfitMargin) =>
